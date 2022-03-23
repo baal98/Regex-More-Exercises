@@ -4,59 +4,47 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Post_Office
+namespace Santa_s_Secret_Helper
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            string[] inputs = Console.ReadLine().Split('|', StringSplitOptions.RemoveEmptyEntries);
-
-            string inputLetters = inputs[0];
-            string lettersPosition = inputs[1];
-            string lettersValue = inputs[2];
-
-            Regex regexLetters = new Regex(@"([\D+\d+]+)?([\$\#\%\&\*]{1})(?'firstLetter'[A-Z]+)\2([\D+\d+])*");
-            Regex regexPositions = new Regex(@"(?'asciiLENGTH'(?'charNumber'\d{2}):(?'wordLength'\d{2}))");
-            Regex regexValue = new Regex(@"\b(?'word'[A-Z][\S]+)\b");
-
-            Match matchLetters = regexLetters.Match(inputLetters);
-            MatchCollection matchesPositions = regexPositions.Matches(lettersPosition);
-            MatchCollection matchesValue = regexValue.Matches(lettersValue);
-
-            string letters = matchLetters.Groups["firstLetter"].Value;
-            List<string> output = new List<string>();
-
-            for (int i = 0; i < letters.Length; i++)
+            string command = "";
+            List<string> listNames = new List<string>();
+            int key = int.Parse(Console.ReadLine());
+            
+            while ((command = Console.ReadLine()) != "end")
             {
-                foreach (Match m in matchesPositions)
+                char[] chars = command.ToCharArray();
+                StringBuilder sb = new StringBuilder();
+
+                foreach (char c in chars)
                 {
-                    char newChar = (char)int.Parse(m.Groups["charNumber"].Value);
-                    int wordLength = int.Parse(m.Groups["wordLength"].Value);
-                    if (letters[i] == newChar)
+                    sb.Append(Convert.ToChar(c - key));
+                }
+
+                string names = sb.ToString();
+
+                Regex regex = new Regex(@"@(?'name'[A-Za-z]+)\S[^-@!:>]+!(?'behavior'[G|N]{1})!");
+
+                MatchCollection matches = regex.Matches(names);
+
+                foreach (Match match in matches)
+                {
+                    if (match.Success)
                     {
-                        foreach (var item in matchesValue)
+                        string behavior = match.Groups["behavior"].Value;
+                        if (behavior == "N")
                         {
-                            string word = item.ToString();
-                            char newCharValue = Convert.ToChar(word.Substring(0, 1));
-                            if (letters[i] == newCharValue && word.Length == wordLength + 1)
-                            {
-                                if (output.Contains(word))
-                                {
-                                    continue;
-                                }
-                                output.Add(word);
-                            }
+                            continue;
                         }
+                        string namesInMatches = match.Groups["name"].Value;
+                        listNames.Add(namesInMatches);
                     }
                 }
-                
             }
-
-            foreach (var word in output)
-            {
-                Console.WriteLine(word);
-            }
+            Console.WriteLine(string.Join("\n", listNames));
         }
     }
 }
