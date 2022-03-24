@@ -4,47 +4,56 @@ using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace Santa_s_Secret_Helper
+namespace World_Tour
 {
     internal class Program
     {
         static void Main(string[] args)
         {
-            string command = "";
-            List<string> listNames = new List<string>();
-            int key = int.Parse(Console.ReadLine());
-            
-            while ((command = Console.ReadLine()) != "end")
+            string destination = Console.ReadLine();
+
+            string command;
+
+            while ((command = Console.ReadLine()) != "Travel")
             {
-                char[] chars = command.ToCharArray();
-                StringBuilder sb = new StringBuilder();
+                List<string> inputs = command.Split(':', StringSplitOptions.RemoveEmptyEntries).ToList();
 
-                foreach (char c in chars)
+                string action = inputs[0];
+
+                if (action == "Add Stop")
                 {
-                    sb.Append(Convert.ToChar(c - key));
-                }
+                    int index = int.Parse(inputs[1]);
+                    string givvenString = inputs[2];
 
-                string names = sb.ToString();
-
-                Regex regex = new Regex(@"@(?'name'[A-Za-z]+)\S[^-@!:>]+!(?'behavior'[G|N]{1})!");
-
-                MatchCollection matches = regex.Matches(names);
-
-                foreach (Match match in matches)
-                {
-                    if (match.Success)
+                    if (index >= 0 && index < destination.Length)
                     {
-                        string behavior = match.Groups["behavior"].Value;
-                        if (behavior == "N")
-                        {
-                            continue;
-                        }
-                        string namesInMatches = match.Groups["name"].Value;
-                        listNames.Add(namesInMatches);
+                        destination = destination.Insert(index, givvenString);
                     }
                 }
+                else if (action == "Remove Stop")
+                {
+                    int startIndex = int.Parse(inputs[1]);
+                    int endIndex = int.Parse(inputs[2]);
+
+                    if (startIndex >= 0 && startIndex < destination.Length && endIndex >= 0 && endIndex < destination.Length)
+                    {
+                        destination = destination.Remove(startIndex, endIndex - startIndex + 1);
+                    }
+                }
+                else if (action == "Switch")
+                {
+                    string oldString = inputs[1];
+                    string newString = inputs[2];
+
+                    if (destination.Contains(oldString))
+                    {
+                        destination = destination.Replace(oldString, newString);
+                    }
+
+                }
+                Console.WriteLine(destination);
             }
-            Console.WriteLine(string.Join("\n", listNames));
+            Console.WriteLine($"Ready for world tour! Planned stops: {destination}");
         }
     }
 }
